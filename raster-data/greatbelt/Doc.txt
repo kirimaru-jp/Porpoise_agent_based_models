@@ -1,0 +1,12 @@
+DOCUMENTATION ON DATASET
+
+Date: 2009-11-13
+Raster files for Great Belt, 100 m resolution
+
+Header:
+ncols 1000
+nrows 1000
+xllcorner 550673
+yllcorner 6100242
+cellsize 100
+NODATA_value -9999
