@@ -1,4 +1,4 @@
-# Porpoise_agent_based_models
+# Agent based models for harbour porpoises
 Julia implementation of harbour porpoise agent based models, based on https://github.com/jacobnabe/Porp-Move.
 The models run > 10 times faster than the same models run on Netlogo.
 - model 0 took around 3.5 seconds for 150,000 loops (with 4 porpoise agents),
