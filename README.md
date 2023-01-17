@@ -6,7 +6,5 @@ The models run > 10 times faster than the same models run on Netlogo.
 
 
 Literature
-
-Nabe-Nielsen, J., Tougaard, J., Teilmann, J., Lucke, K. & Forchhammer, M.C. (2013) How a simple adaptive foraging strategy can lead to emergent home ranges and increased food intake. Oikos, 122, 1307–1316.
-
-Nabe-Nielsen, J., Sibly, R.M., Tougaard, J., Teilmann, J. & Sveegaard, S. (2014) Effects of noise and by-catch on a Danish harbour porpoise population. Ecological Modelling, 272, 242–251.
+- Nabe-Nielsen, J., Tougaard, J., Teilmann, J., Lucke, K. & Forchhammer, M.C. (2013) How a simple adaptive foraging strategy can lead to emergent home ranges and increased food intake. Oikos, 122, 1307–1316.
+- Nabe-Nielsen, J., Sibly, R.M., Tougaard, J., Teilmann, J. & Sveegaard, S. (2014) Effects of noise and by-catch on a Danish harbour porpoise population. Ecological Modelling, 272, 242–251.
