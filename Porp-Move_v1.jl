@@ -1,4 +1,7 @@
 
+print("\033c")
+
+
 #region "Credit
 
 # Implementation of porp_move in Julia
@@ -523,7 +526,7 @@ end
 
 ## Benchmark
 @btime porp_markov_move!($porps, 1) ##   3.150 μs (54 allocations: 7.42 KiB)
-# @code_warntype porp_avoid_land!(porps, 3) ## Test code type stability
+@code_warntype porp_avoid_land!(porps, 3) ## Test code type stability
 
 
 #endregion
@@ -795,7 +798,6 @@ end
 function file_loop(n_loop)
     for i = 1:10
         porps_setup!(porps, pos_list, patches, n_porp)
-        # for j = 1:15000
         for j = 1:n_loop
             for k = 1:n_porp
                 porp_markov_move!(porps, k)
@@ -844,6 +846,25 @@ end
 # 349.587 ms (5250346 allocations: 414.14 MiB)
 @btime file_loop(15000)
 # 3.548 s (52954120 allocations: 4.08 GiB)
+
+
+
+function file_loop_lite(n_loop)
+    for i = 1:10
+        porps_setup!(porps, pos_list, patches, n_porp)
+        for j = 1:n_loop
+            for k = 1:n_porp
+                porp_markov_move!(porps, k)
+            end
+        end
+    end
+    return
+end
+
+
+@btime file_loop_lite(1500)
+# 293.467 ms (5303818 allocations: 417.94 MiB)
+
 
 
 """
@@ -903,3 +924,9 @@ end
 
 
 #endregion
+
+
+using CUDA
+CUDA.versioninfo()
+CUDA.allowscalar(false)
+
