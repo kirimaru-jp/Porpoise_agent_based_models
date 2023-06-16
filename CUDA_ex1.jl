@@ -20,6 +20,33 @@ const BinomialType = Union{Type{<:Integer}}
 const BinomialArray = AnyCuArray{<:Integer}
 
 
+function stirling_approx_tail(k)::Float32
+    if k == 0
+        return 0.0810614667953272f0
+    elseif k == 1
+        return 0.0413406959554092f0
+    elseif k == 2
+        return 0.0276779256849983f0
+    elseif k == 3
+        return 0.0207906721037650f0
+    elseif k == 4
+        return 0.0166446911898211f0
+    elseif k == 5
+        return 0.0138761288230707f0
+    elseif k == 6
+        return 0.0118967099458917f0
+    elseif k == 7
+        return 0.0104112652619720f0
+    elseif k == 8
+        return 0.00925546218271273f0
+    elseif k == 9
+        return 0.00833056343336287f0
+    end
+    kp1sq = (k + 1f0)^2;
+    return (1.0f0 / 12 - (1.0f0 / 360 - 1.0f0 / 1260 / kp1sq) / kp1sq) / (k + 1)
+end
+
+
 function kernel_BTRS_scalar!(A, n, p, seed::UInt32, counter::UInt32)
     device_rng = Random.default_rng()
 
@@ -127,7 +154,6 @@ end
 # function rand_binomial!(rng, A::BinomialArray; count, prob)
 #     return rand_binom!(rng, A, count, prob)
 # end
-
 # rand_binomial!(A::BinomialArray; kwargs...) = rand_binomial!(cuda_rng(), A; kwargs...)
 
 
@@ -140,6 +166,21 @@ B = CUDA.zeros(Int, 1000000)
 @test n * p >= 10f0
 
 # rand_binomial!(cuda_rng(), B, count = n, prob = p)
-rand_binom!(B, count = n, prob = p)
+rand_binom!(B, n, p)
 
-display(@benchmark CUDA.@sync rand_binomial!($B, count = $n, prob = $p))
+# display(@benchmark CUDA.@sync rand_binomial!($B, count = $n, prob = $p))
+display(@benchmark CUDA.@sync rand_binom!($B, $n, $p))
+# BenchmarkTools.Trial: 10000 samples with 1 evaluation.
+#  Range (min … max):  233.200 μs …  11.261 ms  ┊ GC (min … max): 0.00% … 76.42%
+#  Time  (median):     324.000 μs               ┊ GC (median):    0.00%    
+#  Time  (mean ± σ):   326.702 μs ± 113.217 μs  ┊ GC (mean ± σ):  0.26% ±  
+# 0.76%
+#
+#    ▁▂▁▂▁   ▁▂▁             ▁▅▇▇██▇▆▆▅▄▄▃▃▃▂▂▂▁▁▁                ▂
+#   ▇█████▇█████▇▅▆▅▂▅▂▅▄▅▆▆▇███████████████████████▇█▇▇██▇▇▇▇▆▇▆ █        
+#   233 μs        Histogram: log(frequency) by time        416 μs <
+#
+#  Memory estimate: 432 bytes, allocs estimate: 9.
+
+# [https://cuda.juliagpu.org/stable/usage/memory/]
+Array(B)
