@@ -524,10 +524,70 @@ function porp_markov_move!(porp, k)
         
 end
 
+
+# Lite version to test
+function porp_markov_move1!(porp, k)
+    # Movements based on dead-reckoning data -- first calc distance, then turning angle
+    pres_logmov = 0.5 + rand(Normal(0, 0.25), 1)[1]
+    pres_angle = rand(Normal(0, 40), 1)[1]
+    if abs(pres_angle) > 60 # make angle dist more leptokurtic
+        pres_angle = (1 + rand(Uniform(0, 0.5), 1)[1]) * pres_angle
+    end
+    # right pres_angle
+    heading = mod(porp[k].heading + pres_angle, 360)
+    
+    # Turn to avoid swimming on land if necessary
+    goto_avoid_land = false
+    p1 = [1,1]
+    pres_mov = 10 ^ pres_logmov
+    patch_ahead!(p1, porp[k].xcor, porp[k].ycor, pres_mov, heading)
+    if !(bathy_data[p1[1], p1[2]] >= min_depth)
+        goto_avoid_land = true
+    end
+    # number of 25-m steps to check water depth at
+    dd = Int64(ceil(pres_mov / 0.25))
+    for d = dd:-1:1 
+        patch_ahead!(p1, porp[k].xcor, porp[k].ycor, d * 0.25, heading)
+        if !(bathy_data[p1[1], p1[2]] >= min_depth)
+            goto_avoid_land = true
+        end    
+    end
+    
+    # porp[k] = Porp(porp[k].xcor, porp[k].ycor, heading, porp[k].prev_angle, pres_angle, 
+    #                 porp[k].prev_logmov, pres_logmov, porp[k].enough_water_ahead, porp[k].VE_total)
+    
+    
+    return
+        
+end
+
 ## Benchmark
 @btime porp_markov_move!($porps, 1) ##   3.150 μs (54 allocations: 7.42 KiB)
 @code_warntype porp_avoid_land!(porps, 3) ## Test code type stability
 
+
+"""
+    file_loop(n_loop): repeat the Markov movement model for all porpoises.
+"""
+
+function file_loop_lite(n_loop)
+    # for i = 1:10
+        # porps_setup!(porps, pos_list, patches, n_porp)
+        for j = 1:n_loop
+            for k = 1:n_porp
+                # porp_markov_move!(porps, k)
+                porp_markov_move1!(porps, k)
+            end
+        end
+    # end
+    return
+end
+
+
+@btime file_loop_lite(1500)
+# 293.467 ms (5303818 allocations: 417.94 MiB)
+#
+# For lite version: 10.195 ms (212184 allocations: 15.99 MiB)
 
 #endregion
 
@@ -795,6 +855,7 @@ end
 """
     file_loop(n_loop): repeat the Markov movement model for all porpoises.
 """
+
 function file_loop(n_loop)
     for i = 1:10
         porps_setup!(porps, pos_list, patches, n_porp)
@@ -846,25 +907,6 @@ end
 # 349.587 ms (5250346 allocations: 414.14 MiB)
 @btime file_loop(15000)
 # 3.548 s (52954120 allocations: 4.08 GiB)
-
-
-
-function file_loop_lite(n_loop)
-    for i = 1:10
-        porps_setup!(porps, pos_list, patches, n_porp)
-        for j = 1:n_loop
-            for k = 1:n_porp
-                porp_markov_move!(porps, k)
-            end
-        end
-    end
-    return
-end
-
-
-@btime file_loop_lite(1500)
-# 293.467 ms (5303818 allocations: 417.94 MiB)
-
 
 
 """
@@ -924,9 +966,4 @@ end
 
 
 #endregion
-
-
-using CUDA
-CUDA.versioninfo()
-CUDA.allowscalar(false)
 
